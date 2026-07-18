@@ -24,7 +24,6 @@
   <b><a href="#quick-start-5-minutes">Quick start</a> · <a href="#set-it-up-with-an-ai-agent">AI setup</a> · <a href="docs/architecture.md">Architecture</a> · <a href="docs/backups-and-dr.md">Backups</a> · <a href="docs/security.md">Security</a></b>
 </p>
 
-> If this helps you, **star it** — it's how other Pi homelabbers find it.
 
 ---
 
