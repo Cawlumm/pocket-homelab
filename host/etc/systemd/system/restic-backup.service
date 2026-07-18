@@ -1,0 +1,12 @@
+[Unit]
+OnFailure=ntfy-failure@%n.service
+Description=Tier1 restic backup (configs+DBs+irreplaceable -> Glacier IR)
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/restic-backup.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

@@ -1,0 +1,6 @@
+[Unit]
+Description=Alert on unhealthy/down/restarting containers
+After=docker.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/container-watchdog.sh

@@ -1,0 +1,21 @@
+
+services:
+  watchtower:
+    image: nickfedor/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    command: >
+      --cleanup
+      --include-restarting
+      --stop-timeout 60s
+      --schedule "0 0 4 * * *"
+
+    environment:
+      - TZ=America/New_York
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL=ntfy://ntfy.sh/homelab-updates?title=homelab%20container%20update
+      - WATCHTOWER_NOTIFICATION_REPORT=true

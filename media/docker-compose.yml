@@ -1,0 +1,39 @@
+################################################################################
+# MEDIA STACK — playback servers
+# plex (host network) + audiobookshelf. Reads the shared library at
+# ../../volumes/media/library (written by the arr stack).
+# Ports: 32400 plex (host net), 8095 audiobookshelf.
+################################################################################
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - VERSION=docker
+    volumes:
+      - ../../volumes/media/plex:/config
+      - ../../volumes/media/library:/media
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:32400/identity"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    restart: unless-stopped
+    environment:
+      - TZ=America/New_York
+    ports:
+      - "8095:80"
+    volumes:
+      - ../../volumes/media/audiobookshelf/config:/config
+      - ../../volumes/media/library:/media
+      - ../../volumes/media/audiobookshelf/metadata:/metadata

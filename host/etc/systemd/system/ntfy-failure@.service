@@ -1,0 +1,5 @@
+[Unit]
+Description=ntfy alert that unit %i failed
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/curl -s --max-time 10 -H "Title: homelab unit FAILED" -H "Priority: urgent" -H "Tags: rotating_light" -d "systemd unit %i failed on homelab" https://ntfy.sh/homelab-health

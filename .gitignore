@@ -1,0 +1,31 @@
+# === secrets — never commit ===
+.env
+*.env
+# ...but DO track the example templates:
+!.env.example
+!*.env.example
+!**/*.env.example
+
+# CouchDB runtime admin (password hash) written at boot
+obsidian-livesync/config/docker.ini
+obsidian-livesync/config/local.ini
+
+# OpenTofu / Terraform state (holds the IAM secret) + local
+iac/*.tfstate
+iac/*.tfstate.*
+iac/.terraform/
+iac/tfplan
+
+# live data volumes — never in git
+volumes/
+
+# per-user stack selection (written by bootstrap.sh)
+.enabled-stacks
+
+# compose backups
+*.bak
+*.bak.*
+
+# OS cruft
+.DS_Store
+Thumbs.db

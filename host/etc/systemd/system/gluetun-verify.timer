@@ -1,0 +1,8 @@
+[Unit]
+Description=VPN leak/killswitch check every 30 min
+[Timer]
+OnBootSec=8min
+OnUnitActiveSec=30min
+Persistent=true
+[Install]
+WantedBy=timers.target

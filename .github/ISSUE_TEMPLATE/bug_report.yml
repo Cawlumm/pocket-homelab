@@ -1,0 +1,46 @@
+name: "Bug report"
+description: Something isn't working
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What went wrong, and what did you expect instead?
+    validations:
+      required: true
+  - type: input
+    id: stack
+    attributes:
+      label: Which stack / service?
+      placeholder: "e.g. nextcloud, arr/gluetun, backups"
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "`docker logs <container> --tail=50` — REMOVE any secrets/tokens first."
+      render: shell
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      placeholder: |
+        - Pi model: Raspberry Pi 5 (4/8 GB)
+        - OS: Ubuntu 25.04 arm64
+        - Docker: (docker version)
+    validations:
+      required: true
+  - type: checkboxes
+    id: secrets
+    attributes:
+      label: Confirmation
+      options:
+        - label: I removed all secrets/tokens/passwords from the logs above
+          required: true

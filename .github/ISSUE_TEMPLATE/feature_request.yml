@@ -1,0 +1,21 @@
+name: "Feature / new stack"
+description: Suggest an improvement or a service to add
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: A new stack, a doc, a workflow improvement…
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is it useful?
+      description: Who benefits, and how?
+  - type: input
+    id: image
+    attributes:
+      label: Image (if a new service)
+      placeholder: "e.g. ghcr.io/immich-app/immich-server — is it arm64 / Pi-friendly?"

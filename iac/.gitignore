@@ -1,0 +1,13 @@
+# OpenTofu / Terraform state holds secrets -> never commit
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+.cf-token
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

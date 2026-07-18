@@ -1,0 +1,7 @@
+[Unit]
+Description=Verify VPN downloaders are not leaking
+After=docker.service
+Wants=network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/gluetun-verify.sh

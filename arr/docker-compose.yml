@@ -1,0 +1,164 @@
+################################################################################
+# ARR STACK — VPN-isolated download + automation
+# gluetun (ProtonVPN/WireGuard) + qBittorrent + Prowlarr + Radarr/Sonarr/Lidarr
+# NOTE: qbittorrent + *arr share gluetun network namespace (network_mode:
+#       service:gluetun) so they MUST stay in this one compose project.
+# Ports (published on gluetun): 8094 qbit, 8096 lidarr, 8097 prowlarr,
+#       8098 radarr, 8099 sonarr.
+################################################################################
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${PROTON_WG_PRIVATE_KEY}
+      - SERVER_COUNTRIES=United States
+      - VPN_PORT_FORWARDING=on
+      - TZ=America/New_York
+    ports:
+      - "8094:8080"   # qBittorrent
+      - "8096:8686"   # Lidarr
+      - "8098:7878"   # Radarr
+      - "8097:9696"   # Prowlarr
+      - "8099:8989"   # Sonarr
+    volumes:
+      - gluetun-data:/tmp/gluetun
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      - PUID=1000
+      - PGID=1011
+      - TZ=America/New_York
+      - WEBUI_PORT=8080
+    volumes:
+      - ../../volumes/arr/qbittorrent/config:/config
+      - ../../volumes/media/library:/media
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+      qbittorrent:
+        condition: service_started
+      prowlarr:
+        condition: service_started
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ../../volumes/arr/radarr:/config
+      - ../../volumes/media/library:/media
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:7878/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+      qbittorrent:
+        condition: service_started
+      prowlarr:
+        condition: service_started
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ../../volumes/arr/sonarr:/config
+      - ../../volumes/media/library:/media
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8989/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    restart: unless-stopped
+
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+      qbittorrent:
+        condition: service_started
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ../../volumes/arr/lidarr:/config
+      - ../../volumes/media/library:/media
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8686/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ../../volumes/arr/prowlarr:/config
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9696/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    restart: unless-stopped
+
+  gluetun-port-sync:
+    image: alpine:latest
+    container_name: gluetun-port-sync
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+      qbittorrent:
+        condition: service_started
+    volumes:
+      - gluetun-data:/tmp/gluetun:ro
+      - ./port-sync.sh:/port-sync.sh:ro
+    command: sh /port-sync.sh
+    restart: unless-stopped
+
+volumes:
+  gluetun-data:

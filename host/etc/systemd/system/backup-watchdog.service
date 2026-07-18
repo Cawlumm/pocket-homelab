@@ -1,0 +1,7 @@
+[Unit]
+Description=Alert if restic backups have gone stale
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/backup-watchdog.sh

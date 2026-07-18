@@ -1,0 +1,35 @@
+################################################################################
+# BOOKS STACK — ebooks
+# calibre (server/GUI) + calibre-web. Library at ../../volumes/books/calibre/library.
+# Port: 8092 calibre-web.
+################################################################################
+services:
+  calibre:
+    image: lscr.io/linuxserver/calibre:latest
+    container_name: calibre
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - DOCKER_MODS=linuxserver/mods:universal-calibre
+    volumes:
+      - ../../volumes/books/calibre/config:/config
+      - ../../volumes/books/downloads:/downloads
+      - ../../volumes/books/calibre/library:/books
+
+  calibre-web:
+    image: lscr.io/linuxserver/calibre-web:latest
+    container_name: calibre-web
+    restart: unless-stopped
+    depends_on:
+      - calibre
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ../../volumes/books/calibre/library:/books
+      - ../../volumes/books/calibre-web:/config
+    ports:
+      - "8092:8083"

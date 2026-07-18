@@ -1,0 +1,26 @@
+# Service template — copy this folder to  <yourservice>/  and edit.
+#   cp -r _template myapp && cd myapp
+# Live data goes under ../../volumes/<yourservice>/ (outside git).
+# Add the shared `backend` network only if you need Postgres / another stack.
+services:
+  app:
+    image: your/image:latest
+    container_name: yourservice
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8090:80"                       # pick a FREE host port (avoid 8080 — router conflict)
+    volumes:
+      - ../../volumes/yourservice:/data
+    healthcheck:                        # optional but recommended (container-watchdog uses it)
+      test: ["CMD", "curl", "-fsS", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: true

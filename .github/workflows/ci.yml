@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  secret-scan:
+    name: gitleaks secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  compose-validate:
+    name: validate compose files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Seed .env from examples + validate
+        run: |
+          set -e
+          # docker compose config needs the referenced .env to interpolate ${VARS}
+          for d in $(find . -name docker-compose.yml -printf '%h\n' | sort -u); do
+            [ -f "$d/.env.example" ] && cp "$d/.env.example" "$d/.env" || true
+          done
+          fail=0
+          for f in $(find . -name docker-compose.yml | sort); do
+            echo "== validating $f"
+            docker compose -f "$f" config -q || fail=1
+          done
+          exit $fail

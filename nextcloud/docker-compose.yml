@@ -1,0 +1,42 @@
+
+services:
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    env_file:
+      - .env
+    volumes:
+      - ../../volumes/nextcloud:/var/www/html
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:80/status.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    networks:
+      - backend
+
+  # Valkey = open-source, drop-in Redis fork. Used for Nextcloud file locking
+  # (eliminates the leaked oc_file_locks rows) + distributed cache.
+  # No persistence: locking/cache are ephemeral.
+  redis:
+    image: valkey/valkey:8-alpine
+    container_name: nextcloud-redis
+    restart: unless-stopped
+    command: ["valkey-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: true

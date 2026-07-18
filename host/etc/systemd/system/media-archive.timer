@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly Tier2 media cold sync
+
+[Timer]
+OnCalendar=Sun *-*-* 02:00:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target
